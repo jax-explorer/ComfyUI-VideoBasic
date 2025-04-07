@@ -1,8 +1,8 @@
 
 
 
-from nodes.SaveVideo import VideoBasicSaveVideo
-from nodes.VideoUpload import VideoBasicUploadVideo
+from .nodes.SaveVideo import VideoBasicSaveVideo
+from .nodes.VideoUpload import VideoBasicUploadVideo
 
 
 NODE_CLASS_MAPPINGS = { 

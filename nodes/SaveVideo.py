@@ -23,7 +23,7 @@ class VideoBasicSaveVideo:
     def save(self, file_path):
         output_dir = os.path.abspath(folder_paths.get_output_directory())
         
-        # 处理相对路径，将其转换为绝对路径
+        # Handle relative paths, convert them to absolute paths
         if not os.path.isabs(file_path):
             file_path = os.path.join(output_dir, file_path)
         else:
@@ -31,26 +31,26 @@ class VideoBasicSaveVideo:
 
         print(f"file_path is {file_path}, output_dir is {output_dir}")
         
-        # 判断路径是否在输出目录中且文件存在
+        # Check if the path is in the output directory and the file exists
         if file_path.startswith(output_dir) and os.path.exists(file_path):
-            # 获取相对于output_dir的路径
+            # Get the path relative to output_dir
             rel_path = os.path.relpath(file_path, output_dir)
-            # 分离文件名和子文件夹路径
+            # Separate filename and subfolder path
             subfolder = os.path.dirname(rel_path)
             filename = os.path.basename(file_path)
         elif os.path.exists(file_path):
-            # 文件存在但不在output目录，需要复制到output目录
+            # File exists but not in the output directory, need to copy to output directory
             filename = os.path.basename(file_path)
-            subfolder = ""  # 默认保存到output根目录
+            subfolder = ""  # Default save to output root directory
             
-            # 创建目标路径
+            # Create destination path
             dest_path = os.path.join(output_dir, filename)
             
-            # 复制文件到output目录
+            # Copy file to output directory
             shutil.copy2(file_path, dest_path)
             print(f"Copied file from {file_path} to {dest_path}")
             
-            # 更新file_path为新的路径
+            # Update file_path to the new path
             file_path = dest_path
         else:
             filename = None

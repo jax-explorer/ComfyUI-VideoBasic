@@ -7,7 +7,9 @@ Used to solve the OOM (Out Of Memory) issue caused by loading all frames of a vi
 
 todo:
     1. ~~Upscale~~
+
     2. Face Swap
+    
     3. Latent Lip Sync
 
 

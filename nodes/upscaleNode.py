@@ -26,75 +26,75 @@ class VideoUpscaleWithModel:
         if not os.path.exists(video_path):
             raise ValueError(f"Video file not found: {video_path}")
         
-        # 获取临时目录
+        # Get temporary directory
         output_dir = folder_paths.get_temp_directory()
         os.makedirs(output_dir, exist_ok=True)
         
-        # 生成输出文件名
+        # Generate output filename
         video_filename = os.path.basename(video_path)
         output_filename = f"upscaled_{video_filename}"
         if not output_filename.lower().endswith('.mp4'):
             output_filename += '.mp4'
         output_path = os.path.join(output_dir, output_filename)
         
-        # 打开视频文件
+        # Open video file
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():
             raise ValueError(f"Could not open video file: {video_path}")
         
-        # 获取视频信息
+        # Get video information
         width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fps = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
         
-        # 计算上采样后的分辨率
+        # Calculate upsampled resolution
         new_width = int(width * upscale_model.scale)
         new_height = int(height * upscale_model.scale)
         
-        # 创建视频写入器
+        # Create video writer
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(output_path, fourcc, fps, (new_width, new_height))
         
         device = model_management.get_torch_device()
         
-        # 估计所需内存
+        # Estimate required memory
         memory_required = model_management.module_size(upscale_model.model)
         memory_required += (width * height * 3) * 4 * max(upscale_model.scale, 1.0) * 384.0 * batch_size
         model_management.free_memory(memory_required, device)
         
-        # 将模型移至设备
+        # Move model to device
         upscale_model.to(device)
         
-        # 设置瓦片参数
+        # Set tile parameters
         tile = 512
         overlap = 32
         
-        # 批量处理帧
+        # Process frames in batches
         frames_processed = 0
         
         try:
             with tqdm(total=total_frames) as pbar:
                 while frames_processed < total_frames:
-                    # 读取一批帧
+                    # Read a batch of frames
                     batch_frames = []
                     for _ in range(min(batch_size, total_frames - frames_processed)):
                         ret, frame = cap.read()
                         if not ret:
                             break
-                        # 转换为RGB
+                        # Convert to RGB
                         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                        # 归一化到0-1
+                        # Normalize to 0-1
                         frame = frame.astype(np.float32) / 255.0
                         batch_frames.append(frame)
                     
                     if not batch_frames:
                         break
                     
-                    # 转换为PyTorch张量
+                    # Convert to PyTorch tensor
                     batch_tensor = torch.from_numpy(np.stack(batch_frames)).permute(0, 3, 1, 2).to(device)
                     
-                    # 上采样处理
+                    # Upsampling process
                     upscaled_batch = None
                     oom = True
                     current_tile = tile
@@ -107,7 +107,7 @@ class VideoUpscaleWithModel:
                             )
                             pbar_upscale = comfy.utils.ProgressBar(steps)
                             
-                            # 逐帧处理批次
+                            # Process frames in batch one by one
                             upscaled_frames = []
                             for i in range(batch_tensor.shape[0]):
                                 frame = batch_tensor[i:i+1]
@@ -126,12 +126,12 @@ class VideoUpscaleWithModel:
                             if current_tile < 128:
                                 raise e
                     
-                    # 转换回numpy并写入视频
+                    # Convert back to numpy and write to video
                     upscaled_batch = torch.clamp(upscaled_batch.permute(0, 2, 3, 1), min=0, max=1.0)
                     upscaled_batch = upscaled_batch.cpu().numpy()
                     
                     for frame in upscaled_batch:
-                        # 转换为BGR并缩放到0-255
+                        # Convert to BGR and scale to 0-255
                         frame_bgr = cv2.cvtColor((frame * 255).astype(np.uint8), cv2.COLOR_RGB2BGR)
                         out.write(frame_bgr)
                     
@@ -139,7 +139,7 @@ class VideoUpscaleWithModel:
                     pbar.update(len(batch_frames))
         
         finally:
-            # 清理资源
+            # Clean up resources
             upscale_model.to("cpu")
             cap.release()
             out.release()

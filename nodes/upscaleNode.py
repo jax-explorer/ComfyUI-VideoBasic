@@ -5,6 +5,7 @@ import cv2
 import os
 import numpy as np
 from tqdm import tqdm
+import folder_paths
 
 
 class VideoUpscaleWithModel:
@@ -14,7 +15,6 @@ class VideoUpscaleWithModel:
                     "upscale_model": ("UPSCALE_MODEL",),
                     "video_path": ("STRING", {"default": ""}),
                     "batch_size": ("INT", {"default": 8, "min": 1, "max": 1000, "step": 1}),
-                    "output_path": ("STRING", {"default": "upscaled_video.mp4"}),
                 }}
     RETURN_TYPES = ("STRING",)
     RETURN_NAMES = ("output_video_path",)
@@ -22,9 +22,20 @@ class VideoUpscaleWithModel:
 
     CATEGORY = "VideoBasic"
 
-    def upscale_video(self, upscale_model, video_path, batch_size, output_path):
+    def upscale_video(self, upscale_model, video_path, batch_size):
         if not os.path.exists(video_path):
             raise ValueError(f"Video file not found: {video_path}")
+        
+        # 获取临时目录
+        output_dir = folder_paths.get_temp_directory()
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # 生成输出文件名
+        video_filename = os.path.basename(video_path)
+        output_filename = f"upscaled_{video_filename}"
+        if not output_filename.lower().endswith('.mp4'):
+            output_filename += '.mp4'
+        output_path = os.path.join(output_dir, output_filename)
         
         # 打开视频文件
         cap = cv2.VideoCapture(video_path)

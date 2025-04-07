@@ -25,7 +25,7 @@ class VideoBasicUploadVideo:
                 files.append(f)
         return {
             "required": {
-                "file": (sorted(files),),
+                "video": (sorted(files),),
             },
         }
 
@@ -36,17 +36,17 @@ class VideoBasicUploadVideo:
 
     FUNCTION = "upload"
 
-    def upload(self, file):
-        file_path = folder_paths.get_annotated_filepath(file)
+    def upload(self, video):
+        file_path = folder_paths.get_annotated_filepath(video)
         return (file_path,)
 
     @classmethod
-    def IS_CHANGED(s, file, **kwargs):
-        file_path = folder_paths.get_annotated_filepath(file)
+    def IS_CHANGED(s, video, **kwargs):
+        file_path = folder_paths.get_annotated_filepath(video)
         return calculate_file_hash(file_path)
 
     @classmethod
-    def VALIDATE_INPUTS(s, file, **kwargs):
-        if not folder_paths.exists_annotated_filepath(file):
-            return "Invalid file: {}".format(file)
+    def VALIDATE_INPUTS(s, video, **kwargs):
+        if not folder_paths.exists_annotated_filepath(video):
+            return "Invalid file: {}".format(video)
         return True

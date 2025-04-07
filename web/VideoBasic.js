@@ -149,16 +149,16 @@ function useKVState(nodeType) {
         });
     })
 }
-var helpDOM;
-if (!app.helpDOM) {
-    helpDOM = document.createElement("div");
-    app.VHSHelp = helpDOM
+var videoBasicHelpDOM;
+if (!app.videoBasicHelpDOM) {
+    videoBasicHelpDOM = document.createElement("div");
+    app.videoBasicHelpDOM = videoBasicHelpDOM
 }
 function initHelpDOM() {
     let parentDOM = document.createElement("div");
     document.body.appendChild(parentDOM)
-    parentDOM.appendChild(helpDOM)
-    helpDOM.className = "litegraph";
+    parentDOM.appendChild(videoBasicHelpDOM)
+    videoBasicHelpDOM.className = "litegraph";
     let scrollbarStyle = document.createElement('style');
     scrollbarStyle.innerHTML = `
     <style id="scroll-properties">
@@ -187,7 +187,7 @@ function initHelpDOM() {
     `
     parentDOM.appendChild(scrollbarStyle)
     chainCallback(app.canvas, "onDrawForeground", function (ctx, visible_rect){
-        let n = helpDOM.node
+        let n = videoBasicHelpDOM.node
         if (!n || !n?.graph) {
             parentDOM.style['left'] = '-5000px'
             return
@@ -252,11 +252,11 @@ function initHelpDOM() {
             }
         }
     }
-    helpDOM.collapseOnClick = function() {
+    videoBasicHelpDOM.collapseOnClick = function() {
         let doCollapse = this.children[0].innerHTML == '-'
         setCollapse(this.parentElement, doCollapse)
     }
-    helpDOM.selectHelp = function(name, value) {
+    videoBasicHelpDOM.selectHelp = function(name, value) {
         //attempt to navigate to name in help
         function collapseUnlessMatch(items,t) {
             var match = items.querySelector('[VideoBasictitle="' + t + '"]')
@@ -288,17 +288,17 @@ function initHelpDOM() {
             }
             return match
         }
-        let target = collapseUnlessMatch(helpDOM, name)
+        let target = collapseUnlessMatch(videoBasicHelpDOM, name)
         if (target && value) {
             collapseUnlessMatch(target, value)
         }
     }
     let titleContext = document.createElement("canvas").getContext("2d")
     titleContext.font = app.canvas.title_text_font;
-    helpDOM.calculateTitleLength = function(text) {
+    videoBasicHelpDOM.calculateTitleLength = function(text) {
         return titleContext.measureText(text).width
     }
-    helpDOM.addHelp = function(node, nodeType, description) {
+    videoBasicHelpDOM.addHelp = function(node, nodeType, description) {
         if (!description) {
             return
         }
@@ -309,7 +309,7 @@ function initHelpDOM() {
             if (!this.title) {
                 return size
             }
-            let title_width = helpDOM.calculateTitleLength(this.title)
+            let title_width = videoBasicHelpDOM.calculateTitleLength(this.title)
             size[0] = Math.max(size[0], title_width + LiteGraph.NODE_TITLE_HEIGHT*2)
             return size
         }
@@ -332,19 +332,19 @@ function initHelpDOM() {
             //On click would be preferred, but this'll be good enough
             if (pos[1] < 0 && pos[0] + LiteGraph.NODE_TITLE_HEIGHT > this.size[0]) {
                 //corner question mark clicked
-                if (helpDOM.node == this) {
-                    helpDOM.node = undefined
+                if (videoBasicHelpDOM.node == this) {
+                    videoBasicHelpDOM.node = undefined
                 } else {
-                    helpDOM.node = this;
-                    helpDOM.innerHTML = this.description || "no help provided ".repeat(20)
-                    for (let e of helpDOM.querySelectorAll('.VideoBasiccollapse')) {
-                        e.children[0].onclick = helpDOM.collapseOnClick
+                    videoBasicHelpDOM.node = this;
+                    videoBasicHelpDOM.innerHTML = this.description || "no help provided ".repeat(20)
+                    for (let e of videoBasicHelpDOM.querySelectorAll('.VideoBasiccollapse')) {
+                        e.children[0].onclick = videoBasicHelpDOM.collapseOnClick
                         e.children[0].style.cursor = 'pointer'
                     }
-                    for (let e of helpDOM.querySelectorAll('.VideoBasicprecollapse')) {
+                    for (let e of videoBasicHelpDOM.querySelectorAll('.VideoBasicprecollapse')) {
                         setCollapse(e, true)
                     }
-                    helpDOM.parentElement.scrollTo(0,0)
+                    videoBasicHelpDOM.parentElement.scrollTo(0,0)
                 }
                 return true
             }
@@ -355,7 +355,7 @@ function initHelpDOM() {
                 clearTimeout(timeout)
                 timeout = null
             }
-            if (helpDOM.node != this) {
+            if (videoBasicHelpDOM.node != this) {
                 return
             }
             timeout = setTimeout(() => {
@@ -368,11 +368,11 @@ function initHelpDOM() {
                         let row = Math.floor((pos[1] - 7) / LiteGraph.NODE_SLOT_HEIGHT)
                         if (pos[0] < n.size[0]/2) {
                             if (row < n.inputs.length) {
-                                helpDOM.selectHelp(n.inputs[row].name)
+                                videoBasicHelpDOM.selectHelp(n.inputs[row].name)
                             }
                         } else {
                             if (row < n.outputs.length) {
-                                helpDOM.selectHelp(n.outputs[row].name)
+                                videoBasicHelpDOM.selectHelp(n.outputs[row].name)
                             }
                         }
                     } else {
@@ -387,7 +387,7 @@ function initHelpDOM() {
                                 wheight = w.computeSize(n.size[0])[1]
                             }
                             if (pos[1] < basey + wheight) {
-                                helpDOM.selectHelp(w.name, w.value)
+                                videoBasicHelpDOM.selectHelp(w.name, w.value)
                                 break
                             }
                             basey += wheight
@@ -692,13 +692,18 @@ function addUploadWidget(nodeType, nodeData, widgetName, type="video") {
                 onchange: async () => {
                     if (fileInput.files.length) {
                         let resp = await uploadFile(fileInput.files[0])
+
                         if (resp.status != 200) {
                             //upload failed and file can not be added to options
                             return;
                         }
                         const filename = (await resp.json()).name;
+                        console.log("video upload", filename)
+                        console.log("pathWidget", pathWidget)
+
                         pathWidget.options.values.push(filename);
                         pathWidget.value = filename;
+                        console.log("pathWidget.callback", pathWidget.callback)
                         if (pathWidget.callback) {
                             pathWidget.callback(filename)
                         }
@@ -1055,36 +1060,36 @@ function addFormatWidgets(nodeType) {
     });
 }
 function addLoadVideoCommon(nodeType, nodeData) {
-    addCustomSize(nodeType, nodeData, "force_size")
+    // addCustomSize(nodeType, nodeData, "force_size")
     addVideoPreview(nodeType);
     addPreviewOptions(nodeType);
     chainCallback(nodeType.prototype, "onNodeCreated", function() {
         const pathWidget = this.widgets.find((w) => w.name === "video");
-        const frameCapWidget = this.widgets.find((w) => w.name === 'frame_load_cap');
-        const frameSkipWidget = this.widgets.find((w) => w.name === 'skip_first_frames');
-        const rateWidget = this.widgets.find((w) => w.name === 'force_rate');
-        const skipWidget = this.widgets.find((w) => w.name === 'select_every_nth');
-        const sizeWidget = this.widgets.find((w) => w.name === 'force_size');
-        //widget.callback adds unused arguements which need culling
-        let update = function (value, _, node) {
-            let param = {}
-            param[this.name] = value
-            node?.updateParameters(param);
-        }
-        chainCallback(frameCapWidget, "callback", update);
-        chainCallback(frameSkipWidget, "callback", update);
-        chainCallback(rateWidget, "callback", update);
-        chainCallback(skipWidget, "callback", update);
-        let priorSize = sizeWidget.value;
-        let updateSize = function(value, _, node) {
-            if (sizeWidget.value == 'Custom' || priorSize != sizeWidget.value) {
-                node?.updateParameters({"force_size": sizeWidget.serializePreview()});
-            }
-            priorSize = sizeWidget.value;
-        }
-        chainCallback(sizeWidget, "callback", updateSize);
-        chainCallback(this.widgets.find((w) => w.name === "custom_width"), "callback", updateSize);
-        chainCallback(this.widgets.find((w) => w.name === "custom_height"), "callback", updateSize);
+        // const frameCapWidget = this.widgets.find((w) => w.name === 'frame_load_cap');
+        // const frameSkipWidget = this.widgets.find((w) => w.name === 'skip_first_frames');
+        // const rateWidget = this.widgets.find((w) => w.name === 'force_rate');
+        // const skipWidget = this.widgets.find((w) => w.name === 'select_every_nth');
+        // const sizeWidget = this.widgets.find((w) => w.name === 'force_size');
+        // //widget.callback adds unused arguements which need culling
+        // let update = function (value, _, node) {
+        //     let param = {}
+        //     param[this.name] = value
+        //     node?.updateParameters(param);
+        // }
+        // chainCallback(frameCapWidget, "callback", update);
+        // chainCallback(frameSkipWidget, "callback", update);
+        // chainCallback(rateWidget, "callback", update);
+        // chainCallback(skipWidget, "callback", update);
+        // let priorSize = sizeWidget.value;
+        // let updateSize = function(value, _, node) {
+        //     if (sizeWidget.value == 'Custom' || priorSize != sizeWidget.value) {
+        //         node?.updateParameters({"force_size": sizeWidget.serializePreview()});
+        //     }
+        //     priorSize = sizeWidget.value;
+        // }
+        // chainCallback(sizeWidget, "callback", updateSize);
+        // chainCallback(this.widgets.find((w) => w.name === "custom_width"), "callback", updateSize);
+        // chainCallback(this.widgets.find((w) => w.name === "custom_height"), "callback", updateSize);
 
         //do first load
         requestAnimationFrame(() => {
@@ -1286,22 +1291,23 @@ function searchBox(event, [x,y], node) {
     return dialog;
 }
 
-app.ui.settings.addSetting({
-    id: "VHS.AdvancedPreviews",
-    name: "🎥🅥🅗🅢 Advanced Previews",
-    type: "boolean",
-    defaultValue: false,
-});
-app.ui.settings.addSetting({
-    id: "VHS.DefaultMute",
-    name: "🎥🅥🅗🅢 Mute videos by default",
-    type: "boolean",
-    defaultValue: false,
-});
+// app.ui.settings.addSetting({
+//     id: "VHS.AdvancedPreviews",
+//     name: "🎥🅥🅗🅢 Advanced Previews",
+//     type: "boolean",
+//     defaultValue: false,
+// });
+// app.ui.settings.addSetting({
+//     id: "VHS.DefaultMute",
+//     name: "🎥🅥🅗🅢 Mute videos by default",
+//     type: "boolean",
+//     defaultValue: false,
+// });
 
 app.registerExtension({
     name: "VideoBasic",
     async beforeRegisterNodeDef(nodeType, nodeData, app) {
+        console.log("nodeData?.name", nodeData?.name)
         if(nodeData?.name?.startsWith("VideoBasic")) {
             useKVState(nodeType);
             if (nodeData.description) {
@@ -1317,7 +1323,7 @@ app.registerExtension({
                     nodeData.description = el.querySelector('#VideoBasicshortdesc')?.innerHTML || el.children[1]?.firstChild?.innerHTML
                 }
                 chainCallback(nodeType.prototype, "onNodeCreated", function () {
-                    helpDOM.addHelp(this, nodeType, description)
+                    videoBasicHelpDOM.addHelp(this, nodeType, description)
                     this.setSize(this.computeSize())
                 })
             }
@@ -1413,7 +1419,7 @@ app.registerExtension({
             addVAEOutputToggle(nodeType, nodeData);
             applyVHSAudioLinksFix(nodeType, nodeData, 2)
         } else if (nodeData?.name == "VideoBasicVideoSave") {
-            addDateFormatting(nodeType, "filename_prefix");
+            // addDateFormatting(nodeType, "filename_prefix");
             chainCallback(nodeType.prototype, "onExecuted", function(message) {
                 if (message?.gifs) {
                     this.updateParameters(message.gifs[0], true);
@@ -1421,7 +1427,7 @@ app.registerExtension({
             });
             addVideoPreview(nodeType);
             addPreviewOptions(nodeType);
-            addFormatWidgets(nodeType);
+            // addFormatWidgets(nodeType);
             addVAEInputToggle(nodeType, nodeData)
 
             chainCallback(nodeType.prototype, "onNodeCreated", function() {
@@ -1548,8 +1554,8 @@ app.registerExtension({
         }
     },
     async beforeConfigureGraph(graphData, missingNodeTypes) {
-        if(helpDOM?.node) {
-            helpDOM.node = undefined
+        if(videoBasicHelpDOM?.node) {
+            videoBasicHelpDOM.node = undefined
         }
     },
     async setup() {
@@ -1570,8 +1576,8 @@ app.registerExtension({
         app.graphToPrompt = graphToPrompt
     },
     async init() {
-        if (app.VHSHelp != helpDOM) {
-            helpDOM = app.VHSHelp
+        if (app.videoBasicHelpDOM != videoBasicHelpDOM) {
+            videoBasicHelpDOM = app.videoBasicHelpDOM
         } else {
             initHelpDOM()
         }

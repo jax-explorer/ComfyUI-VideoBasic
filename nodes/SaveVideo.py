@@ -1,5 +1,6 @@
 import hashlib
 import os
+import shutil
 
 import folder_paths
 
@@ -8,7 +9,7 @@ class VideoBasicSaveVideo:
     def INPUT_TYPES(s):
         return {
             "required": {
-                "file_path": ("STRING", {"tooltip": "filename"})
+                "file_path": ("STRING",)
             },
         }
 
@@ -37,6 +38,20 @@ class VideoBasicSaveVideo:
             # 分离文件名和子文件夹路径
             subfolder = os.path.dirname(rel_path)
             filename = os.path.basename(file_path)
+        elif os.path.exists(file_path):
+            # 文件存在但不在output目录，需要复制到output目录
+            filename = os.path.basename(file_path)
+            subfolder = ""  # 默认保存到output根目录
+            
+            # 创建目标路径
+            dest_path = os.path.join(output_dir, filename)
+            
+            # 复制文件到output目录
+            shutil.copy2(file_path, dest_path)
+            print(f"Copied file from {file_path} to {dest_path}")
+            
+            # 更新file_path为新的路径
+            file_path = dest_path
         else:
             filename = None
             subfolder = ""

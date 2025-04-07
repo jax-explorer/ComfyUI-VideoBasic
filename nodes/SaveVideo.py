@@ -62,4 +62,5 @@ class VideoBasicSaveVideo:
                 "subfolder": subfolder,
                 "type": "output"
         })
-        return { "ui": { "file": results } }
+        print(f"videos {results}")
+        return { "ui": { "videos": results } }

@@ -820,6 +820,7 @@ function addVideoPreview(nodeType) {
 
         var timeout = null;
         this.updateParameters = (params, force_update) => {
+            console.log("updateParameters", params, force_update);
             if (!previewWidget.value.params) {
                 if(typeof(previewWidget.value != 'object')) {
                     previewWidget.value =  {hidden: false, paused: false}
@@ -847,35 +848,26 @@ function addVideoPreview(nodeType) {
             let params =  {}
             Object.assign(params, this.value.params);//shallow copy
             this.parentEl.hidden = this.value.hidden;
-            if (params.format?.split('/')[0] == 'video' ||
-                app.ui.settings.getSettingValue("VHS.AdvancedPreviews", false) &&
-                (params.format?.split('/')[1] == 'gif') || params.format == 'folder') {
-                this.videoEl.autoplay = !this.value.paused && !this.value.hidden;
-                let target_width = 256
-                if (element.style?.width) {
-                    //overscale to allow scrolling. Endpoint won't return higher than native
-                    target_width = element.style.width.slice(0,-2)*2;
-                }
-                if (!params.force_size || params.force_size.includes("?") || params.force_size == "Disabled") {
-                    params.force_size = target_width+"x?"
-                } else {
-                    let size = params.force_size.split("x")
-                    let ar = parseInt(size[0])/parseInt(size[1])
-                    params.force_size = target_width+"x"+(target_width/ar)
-                }
-                if (app.ui.settings.getSettingValue("VHS.AdvancedPreviews", false)) {
-                    this.videoEl.src = api.apiURL('/viewvideo?' + new URLSearchParams(params));
-                } else {
-                    previewWidget.videoEl.src = api.apiURL('/view?' + new URLSearchParams(params));
-                }
-                this.videoEl.hidden = false;
-                this.imgEl.hidden = true;
-            } else if (params.format?.split('/')[0] == 'image'){
-                //Is animated image
-                this.imgEl.src = api.apiURL('/view?' + new URLSearchParams(params));
-                this.videoEl.hidden = true;
-                this.imgEl.hidden = false;
+            this.videoEl.autoplay = !this.value.paused && !this.value.hidden;
+            let target_width = 256
+            if (element.style?.width) {
+                //overscale to allow scrolling. Endpoint won't return higher than native
+                target_width = element.style.width.slice(0,-2)*2;
             }
+            if (!params.force_size || params.force_size.includes("?") || params.force_size == "Disabled") {
+                params.force_size = target_width+"x?"
+            } else {
+                let size = params.force_size.split("x")
+                let ar = parseInt(size[0])/parseInt(size[1])
+                params.force_size = target_width+"x"+(target_width/ar)
+            }
+            if (app.ui.settings.getSettingValue("VHS.AdvancedPreviews", false)) {
+                this.videoEl.src = api.apiURL('/viewvideo?' + new URLSearchParams(params));
+            } else {
+                previewWidget.videoEl.src = api.apiURL('/view?' + new URLSearchParams(params));
+            }
+            this.videoEl.hidden = false;
+            this.imgEl.hidden = true;
         }
         previewWidget.parentEl.appendChild(previewWidget.videoEl)
         previewWidget.parentEl.appendChild(previewWidget.imgEl)
@@ -1336,11 +1328,12 @@ app.registerExtension({
                         if (!config) {
                             continue
                         }
-                        if (w?.type == "text" && config[1].VideoBasicpath_extensions) {
-                            new_widgets.push(app.widgets.VHSPATH({}, w.name, ["VHSPATH", config[1]]));
-                        } else {
-                            new_widgets.push(w)
-                        }
+                        // if (w?.type == "text" && config[1].VideoBasicpath_extensions) {
+                        //     new_widgets.push(app.widgets.VHSPATH({}, w.name, ["VHSPATH", config[1]]));
+                        // } else {
+                        //     new_widgets.push(w)
+                        // }
+                        new_widgets.push(w)
                     }
                     this.widgets = new_widgets;
                 }
@@ -1421,8 +1414,9 @@ app.registerExtension({
         } else if (nodeData?.name == "VideoBasicVideoSave") {
             // addDateFormatting(nodeType, "filename_prefix");
             chainCallback(nodeType.prototype, "onExecuted", function(message) {
-                if (message?.gifs) {
-                    this.updateParameters(message.gifs[0], true);
+                console.log("updateParameters onExecuted", message?.videos)
+                if (message?.videos) {
+                    this.updateParameters(message.videos[0], true);
                 }
             });
             addVideoPreview(nodeType);

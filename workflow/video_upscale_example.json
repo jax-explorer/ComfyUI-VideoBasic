@@ -1,0 +1,217 @@
+{
+  "id": "28a081b0-699e-42f4-ae06-904ba9b72116",
+  "revision": 0,
+  "last_node_id": 28,
+  "last_link_id": 18,
+  "nodes": [
+    {
+      "id": 25,
+      "type": "VideoBasicVideoSave",
+      "pos": [
+        -2522.12109375,
+        -1870.5540771484375
+      ],
+      "size": [
+        315,
+        244.17898559570312
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "widget": {
+            "name": "file_path"
+          },
+          "link": 17
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "aux_id": "jax-explorer/ComfyUI-VideoBasic",
+        "ver": "130152114bdc824de3d9ea57ff860c26efa8a72f",
+        "Node name for S&R": "VideoBasicVideoSave"
+      },
+      "widgets_values": {
+        "file_path": "",
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "upscaled_AnimateDiff_00006 (10).mp4",
+            "subfolder": "",
+            "type": "output"
+          }
+        }
+      }
+    },
+    {
+      "id": 28,
+      "type": "UpscaleModelLoader",
+      "pos": [
+        -2957.47900390625,
+        -2077.022216796875
+      ],
+      "size": [
+        315,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "UPSCALE_MODEL",
+          "type": "UPSCALE_MODEL",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "UpscaleModelLoader"
+      },
+      "widgets_values": [
+        "4x_IllustrationJaNai_V1_DAT2_190k.pth"
+      ]
+    },
+    {
+      "id": 27,
+      "type": "VideoBasicVideoUpscaleWithModel",
+      "pos": [
+        -3018.605712890625,
+        -1839.4351806640625
+      ],
+      "size": [
+        441,
+        106
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "upscale_model",
+          "type": "UPSCALE_MODEL",
+          "link": 16
+        },
+        {
+          "name": "video_path",
+          "type": "STRING",
+          "widget": {
+            "name": "video_path"
+          },
+          "link": 15
+        }
+      ],
+      "outputs": [
+        {
+          "name": "output_video_path",
+          "type": "STRING",
+          "links": [
+            17
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "jax-explorer/ComfyUI-VideoBasic",
+        "ver": "130152114bdc824de3d9ea57ff860c26efa8a72f",
+        "Node name for S&R": "VideoBasicVideoUpscaleWithModel"
+      },
+      "widgets_values": {
+        "video_path": "",
+        "batch_size": 20
+      }
+    },
+    {
+      "id": 24,
+      "type": "VideoBasicLoadVideo",
+      "pos": [
+        -3426.824462890625,
+        -1899.7896728515625
+      ],
+      "size": [
+        315,
+        268.8515625
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "file_path",
+          "type": "STRING",
+          "links": [
+            15
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "jax-explorer/ComfyUI-VideoBasic",
+        "ver": "130152114bdc824de3d9ea57ff860c26efa8a72f",
+        "Node name for S&R": "VideoBasicLoadVideo"
+      },
+      "widgets_values": {
+        "video": "AnimateDiff_00006 (10).mp4",
+        "choose video to upload": "image",
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_00006 (10).mp4",
+            "type": "input",
+            "format": "video/mp4"
+          }
+        }
+      }
+    }
+  ],
+  "links": [
+    [
+      15,
+      24,
+      0,
+      27,
+      1,
+      "STRING"
+    ],
+    [
+      16,
+      28,
+      0,
+      27,
+      0,
+      "UPSCALE_MODEL"
+    ],
+    [
+      17,
+      27,
+      0,
+      25,
+      0,
+      "STRING"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8954302432552416,
+      "offset": [
+        3740.825955130019,
+        2344.9184036722013
+      ]
+    },
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

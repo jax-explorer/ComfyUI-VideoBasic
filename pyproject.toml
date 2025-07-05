@@ -1,0 +1,15 @@
+[project]
+name = "videobasic"
+description = "Used to solve the OOM (Out Of Memory) issue caused by loading all frames of a video at once in ComfyUI. All nodes use streamingly, and no longer load all frames of the video into memory at once."
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["opencv-python"]
+
+[project.urls]
+Repository = "https://github.com/jax-explorer/ComfyUI-VideoBasic"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-VideoBasic"
+Icon = ""
